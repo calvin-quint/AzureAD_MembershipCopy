@@ -9,7 +9,7 @@
 # Define log file path
 $logFilePath = "C:\Scripts\Powershell\Logs\AzureAD_MembershipCopy_Log.txt"
 
-# Function to write log messages
+# Function to write log messages with log rotation
 function Write-Log {
     param(
         [string]$message,
@@ -21,8 +21,21 @@ function Write-Log {
     # Display the log message in the console
     Write-Host $logMessage
 
-    # Write the log message to the log file
+    # Append the log message to the log file
     $logMessage | Out-File -FilePath $logFilePath -Append
+
+    # Get the current log file size
+    $currentFileSize = (Get-Item $logFilePath).Length
+
+    # Define the maximum log file size (100MB)
+    $maxLogSize = 100MB
+
+    # If the current log file size exceeds the maximum, perform log rotation
+    if ($currentFileSize -gt $maxLogSize) {
+        $linesToKeep = 500  # Define the maximum number of log lines to keep
+        $logContent = Get-Content -Path $logFilePath -TotalCount $linesToKeep
+        $logContent | Out-File -FilePath $logFilePath -Force
+    }
 }
 
 # Function to validate email address format
@@ -189,4 +202,4 @@ function Main {
 }
 
 # Execute the main script
-Main
+Main | Out-Null
