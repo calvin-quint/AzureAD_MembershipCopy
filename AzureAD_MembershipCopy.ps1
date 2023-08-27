@@ -1,6 +1,12 @@
 # Define log file path
 $logFilePath = "C:\Scripts\Powershell\Logs\AzureAD_MembershipCopy_Log.txt"
 
+# Ensure the log directory exists
+$logDirectory = [System.IO.Path]::GetDirectoryName($logFilePath)
+if (-not (Test-Path -Path $logDirectory)) {
+    New-Item -Path $logDirectory -ItemType Directory -Force
+}
+
 # Function to write log messages with log rotation
 function Write-Log {
     param(
