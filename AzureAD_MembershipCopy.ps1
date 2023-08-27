@@ -25,6 +25,35 @@ function Write-Log {
     $logMessage | Out-File -FilePath $logFilePath -Append
 }
 
+# Function to validate email address format
+function Validate-EmailAddress {
+    param(
+        [string]$email
+    )
+
+    if ($email -match "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$") {
+        return $true
+    } else {
+        return $false
+    }
+}
+
+# Function to get user input for email address
+function Get-ValidEmailInput {
+    param(
+        [string]$prompt
+    )
+
+    $email = $null
+    while (-not (Validate-EmailAddress $email)) {
+        $email = Read-Host $prompt
+        if (-not (Validate-EmailAddress $email)) {
+            Write-Host "Invalid email address format. Please enter a valid email address."
+        }
+    }
+    return $email
+}
+
 # Function to install and import a module
 function Install-AndImportModule {
     param(
@@ -128,9 +157,9 @@ function Process-DistributionGroupMembership {
 function Main {
     Write-Log "Starting script execution." "info"
 
-    # Prompt for user input
-    $upn1 = Get-UserInput "Enter the username to copy from"
-    $upn2 = Get-UserInput "Enter the username to copy to"
+    # Prompt for valid user email input
+    $upn1 = Get-ValidEmailInput "Enter the email to copy from (e.g., example@gmail.com)"
+    $upn2 = Get-ValidEmailInput "Enter the email to copy to (e.g., example@gmail.com)"
 
     Install-AndImportModule -moduleName "AzureAD" -moduleCheckCommand "Get-Module -Name AzureAD -ListAvailable"
     Install-AndImportModule -moduleName "ExchangeOnlineManagement" -moduleCheckCommand "Get-Module -Name ExchangeOnlineManagement -ListAvailable"
