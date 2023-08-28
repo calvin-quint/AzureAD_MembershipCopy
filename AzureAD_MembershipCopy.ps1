@@ -154,15 +154,40 @@ function Process-DistributionGroupMembership {
         $isMember = Get-DistributionGroupMember -Identity $groupDisplayName | Where-Object { $_.PrimarySmtpAddress -eq $upn2 }
 
         if ($isMember) {
-            Write-Log "User $upn2 is already a member of $groupDisplayName" "info"
+            Write-Log "User $upn2 is already a member of Distribution Group $groupDisplayName" "info"
         } else {
             Add-DistributionGroupMember -Identity $groupDisplayName -Member $upn2 -BypassSecurityGroupManagerCheck
-            Write-Log "Added $upn2 to $groupDisplayName" "info"
+            Write-Log "Added $upn2 to Distribution Group $groupDisplayName" "info"
+        }
+    }
+
+   
+}
+
+function Process-M365GroupMembership {
+    param(
+        [string]$upn1,
+        [string]$upn2
+    )
+
+    $unifiedGroups = Get-UnifiedGroup -ResultSize Unlimited | Where-Object { Get-UnifiedGroupLinks -Identity $_.Id -LinkType Members | Where-Object { $_.PrimarySmtpAddress -eq $upn1 } }
+
+    foreach ($group in $unifiedGroups) {
+        $groupId = $group.Id
+        $groupDisplayName = $group.DisplayName
+        $isMember = Get-UnifiedGroupLinks -Identity $groupId -LinkType Members | Where-Object { $_.PrimarySmtpAddress -eq $upn2 }
+
+        if ($isMember) {
+            Write-Log "User $upn2 is already a member of Microsoft 365 Group $groupDisplayName" "info"
+        } else {
+            Add-UnifiedGroupLinks -Identity $groupId -LinkType Members -Links $upn2 -ErrorAction SilentlyContinue
+            Write-Log "Added $upn2 to Microsoft 365 Group $groupDisplayName" "info"
         }
     }
 
     Disconnect-ExchangeOnline -Confirm:$false
 }
+
 
 # Main script logic
 function Main {
@@ -194,6 +219,7 @@ function Main {
 
         Process-GroupMembership -upn1 $upn1 -upn2 $upn2 -user1ObjectId $user1ObjectId -user2ObjectId $user2ObjectId -user1Groups $user1Groups -user2Groups $user2Groups
         Process-DistributionGroupMembership -upn1 $upn1 -upn2 $upn2
+        Process-M365GroupMembership -upn1 $upn1 -upn2 $upn2 
     }
 
     Write-Log "Script execution completed." "info"
