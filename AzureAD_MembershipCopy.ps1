@@ -164,6 +164,31 @@ function Process-DistributionGroupMembership {
    
 }
 
+function Process-MailEnableSecurityGroup {
+    param(
+        [string]$upn1,
+        [string]$upn2
+    )
+
+   
+
+    $mailenablegroups = Get-DistributionGroup -ResultSize Unlimited | Where-Object { $_.RecipientTypeDetails -eq "MailUniversalSecurityGroup" -and (Get-DistributionGroupMember $_ | Where-Object { $_.PrimarySmtpAddress -eq $upn1 }) }
+
+    foreach ($group in $mailenablegroups) {
+        $groupDisplayName = $group.DisplayName
+        $isMember = Get-DistributionGroupMember -Identity $groupDisplayName | Where-Object { $_.PrimarySmtpAddress -eq $upn2 }
+
+        if ($isMember) {
+            Write-Log "User $upn2 is already a member of Mail Enabled Security Group $groupDisplayName" "info"
+        } else {
+            Add-DistributionGroupMember -Identity $groupDisplayName -Member $upn2 -BypassSecurityGroupManagerCheck
+            Write-Log "Added $upn2 to Mail Enabled Security Group $groupDisplayName" "info"
+        }
+    }
+
+   
+}
+
 function Process-M365GroupMembership {
     param(
         [string]$upn1,
@@ -187,6 +212,7 @@ function Process-M365GroupMembership {
 
     Disconnect-ExchangeOnline -Confirm:$false
 }
+
 
 
 # Main script logic
@@ -219,6 +245,7 @@ function Main {
 
         Process-GroupMembership -upn1 $upn1 -upn2 $upn2 -user1ObjectId $user1ObjectId -user2ObjectId $user2ObjectId -user1Groups $user1Groups -user2Groups $user2Groups
         Process-DistributionGroupMembership -upn1 $upn1 -upn2 $upn2
+        Process-MailEnableSecurityGroup -upn1 $upn1 -upn2 $upn2 
         Process-M365GroupMembership -upn1 $upn1 -upn2 $upn2 
     }
 
