@@ -107,9 +107,9 @@ function Add-UserToGroup {
 
     try {
         Add-AzureADGroupMember -ObjectId $groupObjectId -RefObjectId $userObjectId -ErrorAction Stop
-        Write-Log "Added $userUpn to Azure AD group $groupName (ObjectId: $groupObjectId)" "info"
+        Write-Log "Added $userUpn to Azure AD group $groupName" "info"
     } catch {
-        Write-Log "Failed to add $userUpn to Azure AD group $groupName (ObjectId: $groupObjectId)" "error"
+        Write-Log "Failed to add $userUpn to Azure AD group $groupName" "error"
     }
 }
 
@@ -129,7 +129,7 @@ function Process-GroupMembership {
         $groupId = $group1Details.ObjectId
 
         if ($user2Groups.ObjectId -contains $groupId) {
-            Write-Log "$upn2 is already a member of Azure AD group $($group1Details.DisplayName) (ObjectId: $groupId)." "info"
+            Write-Log "$upn2 is already a member of Azure AD group $($group1Details.DisplayName)" "info"
         } else {
             Add-UserToGroup -userObjectId $user2ObjectId -groupObjectId $groupId -userUpn $upn2 -groupName $group1Details.DisplayName
         }
