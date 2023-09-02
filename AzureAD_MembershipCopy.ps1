@@ -220,8 +220,8 @@ function Main {
     Write-Log "Starting script execution." "info"
 
     # Prompt for valid user email input
-    $upn1 = Get-ValidEmailInput "Enter the email to copy from (e.g., example@gmail.com)"
-    $upn2 = Get-ValidEmailInput "Enter the email to copy to (e.g., example@gmail.com)"
+    $upn1 = Get-ValidEmailInput "Enter the source username (e.g., example@gmail.com)"
+    $upn2 = Get-ValidEmailInput "Enter the destination username (e.g., example@gmail.com)"
 
     Install-AndImportModule -moduleName "AzureAD" -moduleCheckCommand "Get-Module -Name AzureAD -ListAvailable"
     Install-AndImportModule -moduleName "ExchangeOnlineManagement" -moduleCheckCommand "Get-Module -Name ExchangeOnlineManagement -ListAvailable"
