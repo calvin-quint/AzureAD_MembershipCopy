@@ -1,31 +1,47 @@
-# Define log file path
-$logDirectory = "$env:OneDrive\Documents\Scripts\Powershell\Logs"
-$logFilePath = "$logDirectory\AzureAD_MembershipCopy_Log.txt"
+# Function to check if OneDrive exists
+function Test-OneDrive {
+    if ($env:OneDrive -ne $null -and $env:OneDrive -ne "") {
+        return $true
+    } else {
+        return $false
+    }
+}
 
-function Ensure-LogDirectory {
+# Function to get the log directory path
+function Get-LogDirectory {
+    if (Test-OneDrive) {
+        return "$env:OneDrive\Documents\Scripts\Powershell\Logs"
+    } else {
+        return "$env:USERPROFILE\Documents\Scripts\Powershell\Logs"
+    }
+}
+
+# Function to ensure the existence of a directory
+function Ensure-Directory {
     param (
-        [string]$logDirectoryPath
+        [string]$directoryPath
     )
 
-    # Ensure the log directory exists
-    if (-not (Test-Path -Path $logDirectoryPath -PathType Container)) {
+    if (-not (Test-Path -Path $directoryPath -PathType Container)) {
         try {
-            New-Item -Path $logDirectoryPath -ItemType Directory -Force
-            Write-Host "Log directory created: $logDirectoryPath"
+            New-Item -Path $directoryPath -ItemType Directory -Force
+            Write-Host "Directory created: $directoryPath"
         } catch {
-            Write-Host "Failed to create log directory: $logDirectoryPath"
+            Write-Host "Failed to create directory: $directoryPath"
             Write-Host "Error: $_"
             exit 1
         }
     }
 }
 
+$logFilePath = "$logDirectory\AzureAD_MembershipCopy_Log.txt"
+
+# Function to ensure the existence of a log file
 function Ensure-LogFile {
     param (
         [string]$logFilePath
     )
 
-    # Ensure the log file exists
     if (-not (Test-Path -Path $logFilePath)) {
         try {
             $null | Out-File -FilePath $logFilePath -Force
@@ -44,13 +60,16 @@ function Write-Log {
         [string]$level
     )
 
+    $logDirectory = Get-LogDirectory
+    $logFilePath = "$logDirectory\AzureAD_MembershipCopy_Log.txt"
+
     $logMessage = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [$level] $message"
 
     # Display the log message in the console
     Write-Host $logMessage
 
     # Ensure the log directory and log file exist
-    Ensure-LogDirectory -logDirectoryPath $logDirectory
+    Ensure-Directory -directoryPath $logDirectory
     Ensure-LogFile -logFilePath $logFilePath
 
     # Append the log message to the log file
