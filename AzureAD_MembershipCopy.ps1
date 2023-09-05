@@ -121,43 +121,48 @@ function Get-ValidEmailInput {
     return $email
 }
 
-function IsValidDomain($email, $allowedDomains) {
-    $domain = $email.Split('@')[1]
-    return $domain -in $allowedDomains
-}
+# Function to get user input for email address
+function Get-ValidEmailInput {
+    param(
+        [string]$prompt
+    )
 
-function Get-ValidEmailInputWithDomainCheck($message, $allowedDomains) {
     $email = $null
-
-    while ($email -eq $null -or -not (IsValidDomain $email $allowedDomains)) {
-        $email = Get-ValidEmailInput $message
-
-        if ($email -eq $null) {
-            Write-Log "Email cannot be empty. Please enter a valid email address." "ERROR"
-            continue
-        }
-
-        if (-not (IsValidDomain $email $allowedDomains)) {
-            Write-Log "Invalid domain in email address. Allowed domains are: $($allowedDomains -join ', ')." "ERROR"
+    while (-not (Validate-EmailAddress $email)) {
+        $email = Read-Host $prompt
+        if (-not (Validate-EmailAddress $email)) {
+            Write-Log "Invalid email address format. Please enter a valid email address." "ERROR"
         }
     }
-
     return $email
 }
 
 function Get-UniqueEmailInputs {
-    $allowedDomains = @("op.test.com", "test.com")
+    $upn1 = $null
+    $upn2 = $null
+
+    $upn1 = Get-ValidEmailInput "Enter the source username (e.g., user@example.com)"
     
-    $upn1 = Get-ValidEmailInputWithDomainCheck "Enter the source username (e.g., user@$($allowedDomains[0]) or user@$($allowedDomains[1]))" $allowedDomains
-    $upn2 = Get-ValidEmailInputWithDomainCheck "Enter the destination username (e.g., user@$($allowedDomains[0]) or user@$($allowedDomains[1]))" $allowedDomains
+    while ($upn1 -eq $null) {
+        Write-Log "Source username cannot be empty. Please enter a valid username." "ERROR"
+        $upn1 = Get-ValidEmailInput "Enter the source username (e.g., user@example.com)"
+    }
+
+    $upn2 = Get-ValidEmailInput "Enter the destination username (e.g., user@example.com)"
+
+    while ($upn2 -eq $null) {
+        Write-Log "Destination username cannot be empty. Please enter a valid username." "ERROR"
+        $upn2 = Get-ValidEmailInput "Enter the destination username (e.g., user@example.com)"
+    }
 
     while ($upn1 -eq $upn2) {
         Write-Log "Source and destination usernames cannot be the same. Please enter different usernames." "ERROR"
-        $upn2 = Get-ValidEmailInputWithDomainCheck "Enter the destination username (e.g., user@$($allowedDomains[0]) or user@$($allowedDomains[1]))" $allowedDomains
+        $upn2 = Get-ValidEmailInput "Enter the destination username (e.g., user@example.com)"
     }
 
     return $upn1, $upn2
 }
+
 
 
 # Function to install and import a module
