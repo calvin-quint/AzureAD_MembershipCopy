@@ -2,27 +2,39 @@
 $logDirectory = "$env:OneDrive\Documents\Scripts\Powershell\Logs"
 $logFilePath = "$logDirectory\AzureAD_MembershipCopy_Log.txt"
 
-# Ensure the log directory exists
-if (-not (Test-Path -Path $logDirectory -PathType Container)) {
-    try {
-        New-Item -Path $logDirectory -ItemType Directory -Force
-        Write-Host "Log directory created: $logDirectory"
-    } catch {
-        Write-Host "Failed to create log directory: $logDirectory"
-        Write-Host "Error: $_"
-        exit 1
+function Ensure-LogDirectory {
+    param (
+        [string]$logDirectoryPath
+    )
+
+    # Ensure the log directory exists
+    if (-not (Test-Path -Path $logDirectoryPath -PathType Container)) {
+        try {
+            New-Item -Path $logDirectoryPath -ItemType Directory -Force
+            Write-Host "Log directory created: $logDirectoryPath"
+        } catch {
+            Write-Host "Failed to create log directory: $logDirectoryPath"
+            Write-Host "Error: $_"
+            exit 1
+        }
     }
 }
 
-# Ensure the log file exists
-if (-not (Test-Path -Path $logFilePath)) {
-    try {
-        $null | Out-File -FilePath $logFilePath -Force
-        Write-Host "Log file created: $logFilePath"
-    } catch {
-        Write-Host "Failed to create log file: $logFilePath"
-        Write-Host "Error: $_"
-        exit 1
+function Ensure-LogFile {
+    param (
+        [string]$logFilePath
+    )
+
+    # Ensure the log file exists
+    if (-not (Test-Path -Path $logFilePath)) {
+        try {
+            $null | Out-File -FilePath $logFilePath -Force
+            Write-Host "Log file created: $logFilePath"
+        } catch {
+            Write-Host "Failed to create log file: $logFilePath"
+            Write-Host "Error: $_"
+            exit 1
+        }
     }
 }
 # Function to write log messages with log rotation
@@ -36,6 +48,10 @@ function Write-Log {
 
     # Display the log message in the console
     Write-Host $logMessage
+
+    # Ensure the log directory and log file exist
+    Ensure-LogDirectory -logDirectoryPath $logDirectory
+    Ensure-LogFile -logFilePath $logFilePath
 
     # Append the log message to the log file
     $logMessage | Out-File -FilePath $logFilePath -Append
@@ -53,6 +69,7 @@ function Write-Log {
         $logContent | Out-File -FilePath $logFilePath -Force
     }
 }
+
 
 # Function to validate email address format
 function Validate-EmailAddress {
