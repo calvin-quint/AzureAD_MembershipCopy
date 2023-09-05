@@ -1,12 +1,30 @@
 # Define log file path
-$logFilePath = "C:\Scripts\Powershell\Logs\AzureAD_MembershipCopy_Log.txt"
+$logDirectory = "$env:OneDrive\Documents\Scripts\Powershell\Logs"
+$logFilePath = "$logDirectory\AzureAD_MembershipCopy_Log.txt"
 
 # Ensure the log directory exists
-$logDirectory = [System.IO.Path]::GetDirectoryName($logFilePath)
-if (-not (Test-Path -Path $logDirectory)) {
-    New-Item -Path $logDirectory -ItemType Directory -Force
+if (-not (Test-Path -Path $logDirectory -PathType Container)) {
+    try {
+        New-Item -Path $logDirectory -ItemType Directory -Force
+        Write-Host "Log directory created: $logDirectory"
+    } catch {
+        Write-Host "Failed to create log directory: $logDirectory"
+        Write-Host "Error: $_"
+        exit 1
+    }
 }
 
+# Ensure the log file exists
+if (-not (Test-Path -Path $logFilePath)) {
+    try {
+        $null | Out-File -FilePath $logFilePath -Force
+        Write-Host "Log file created: $logFilePath"
+    } catch {
+        Write-Host "Failed to create log file: $logFilePath"
+        Write-Host "Error: $_"
+        exit 1
+    }
+}
 # Function to write log messages with log rotation
 function Write-Log {
     param(
