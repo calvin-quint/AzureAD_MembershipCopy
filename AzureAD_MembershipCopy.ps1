@@ -113,11 +113,28 @@ function Get-ValidEmailInput {
     while (-not (Validate-EmailAddress $email)) {
         $email = Read-Host $prompt
         if (-not (Validate-EmailAddress $email)) {
-            Write-Host "Invalid email address format. Please enter a valid email address."
+            Write-log "Invalid email address format. Please enter a valid email address." "error"
         }
     }
     return $email
 }
+
+function Get-UniqueEmailInputs {
+    $upn1 = $null
+    $upn2 = $null
+    
+    while ($upn1 -eq $upn2) {
+        $upn1 = Get-ValidEmailInput "Enter the source username (e.g., example@gmail.com)"
+        $upn2 = Get-ValidEmailInput "Enter the destination username (e.g., example@gmail.com)"
+
+        if ($upn1 -eq $upn2) {
+            Write-Log "Source and destination usernames cannot be the same. Please enter different usernames." "error"
+        }
+    }
+
+    return $upn1, $upn2
+}
+
 
 # Function to install and import a module
 function Install-AndImportModule {
@@ -274,8 +291,7 @@ function Main {
     Write-Log "Starting script execution." "info"
 
     # Prompt for valid user email input
-    $upn1 = Get-ValidEmailInput "Enter the source username (e.g., example@gmail.com)"
-    $upn2 = Get-ValidEmailInput "Enter the destination username (e.g., example@gmail.com)"
+    $upn1, $upn2 = Get-UniqueEmailInputs
 
     Install-AndImportModule -moduleName "AzureAD" -moduleCheckCommand "Get-Module -Name AzureAD -ListAvailable"
     Install-AndImportModule -moduleName "ExchangeOnlineManagement" -moduleCheckCommand "Get-Module -Name ExchangeOnlineManagement -ListAvailable"
