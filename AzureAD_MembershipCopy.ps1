@@ -34,8 +34,6 @@ function Ensure-Directory {
     }
 }
 
-$logFilePath = "$logDirectory\AzureAD_MembershipCopy_Log.txt"
-
 # Function to ensure the existence of a log file
 function Ensure-LogFile {
     param (
@@ -113,7 +111,7 @@ function Get-ValidEmailInput {
     while (-not (Validate-EmailAddress $email)) {
         $email = Read-Host $prompt
         if (-not (Validate-EmailAddress $email)) {
-            Write-log "Invalid email address format. Please enter a valid email address." "ERROR"
+            Write-Host "Invalid email address format. Please enter a valid email address."
         }
     }
     return $email
@@ -128,12 +126,13 @@ function Get-UniqueEmailInputs {
         $upn2 = Get-ValidEmailInput "Enter the destination username (e.g., example@gmail.com)"
 
         if ($upn1 -eq $upn2) {
-            Write-Log "Source and destination usernames cannot be the same. Please enter different usernames." "ERROR"
+            Write-Host "Source and destination usernames cannot be the same. Please enter different usernames."
         }
     }
 
     return $upn1, $upn2
 }
+
 
 # Function to install and import a module
 function Install-AndImportModule {
@@ -146,11 +145,11 @@ function Install-AndImportModule {
         $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
         if (-not $isAdmin) {
-            Write-Log "This script requires administrator rights to install the $moduleName module. Please run the script as an administrator." "ERROR"
+            Write-Log "This script requires administrator rights to install the $moduleName module. Please run the script as an administrator." "error"
             exit
         }
 
-        Write-Log "Installing $moduleName module..." "INFO"
+        Write-Log "Installing $moduleName module..." "info"
         Install-Module -Name $moduleName -Force
     }
     Import-Module $moduleName -ErrorAction Stop
@@ -177,9 +176,9 @@ function Add-UserToGroup {
 
     try {
         Add-AzureADGroupMember -ObjectId $groupObjectId -RefObjectId $userObjectId -ErrorAction Stop
-        Write-Log "Added $userUpn to Azure AD group $groupName" "INFO"
+        Write-Log "Added $userUpn to Azure AD group $groupName" "info"
     } catch {
-        Write-Log "Failed to add $userUpn to Azure AD group $groupName" "ERROR"
+        Write-Log "Failed to add $userUpn to Azure AD group $groupName" "error"
     }
 }
 
@@ -199,13 +198,13 @@ function Process-GroupMembership {
         $groupId = $group1Details.ObjectId
 
         if ($user2Groups.ObjectId -contains $groupId) {
-            Write-Log "$upn2 is already a member of Azure AD group $($group1Details.DisplayName)" "INFO"
+            Write-Log "$upn2 is already a member of Azure AD group $($group1Details.DisplayName)" "info"
         } else {
             Add-UserToGroup -userObjectId $user2ObjectId -groupObjectId $groupId -userUpn $upn2 -groupName $group1Details.DisplayName
         }
     }
 
-    Write-Log "$upn2 has been added to Azure AD groups that $upn1 is a member of." "INFO"
+    Write-Log "$upn2 has been added to Azure AD groups that $upn1 is a member of." "info"
 }
 
 # Function to process distribution group membership
@@ -224,10 +223,10 @@ function Process-DistributionGroupMembership {
         $isMember = Get-DistributionGroupMember -Identity $groupDisplayName | Where-Object { $_.PrimarySmtpAddress -eq $upn2 }
 
         if ($isMember) {
-            Write-Log "User $upn2 is already a member of Distribution Group $groupDisplayName" "INFO"
+            Write-Log "User $upn2 is already a member of Distribution Group $groupDisplayName" "info"
         } else {
             Add-DistributionGroupMember -Identity $groupDisplayName -Member $upn2 -BypassSecurityGroupManagerCheck
-            Write-Log "Added $upn2 to Distribution Group $groupDisplayName" "INFO"
+            Write-Log "Added $upn2 to Distribution Group $groupDisplayName" "info"
         }
     }
 
@@ -249,10 +248,10 @@ function Process-MailEnableSecurityGroup {
         $isMember = Get-DistributionGroupMember -Identity $groupDisplayName | Where-Object { $_.PrimarySmtpAddress -eq $upn2 }
 
         if ($isMember) {
-            Write-Log "User $upn2 is already a member of Mail Enabled Security Group $groupDisplayName" "INFO"
+            Write-Log "User $upn2 is already a member of Mail Enabled Security Group $groupDisplayName" "info"
         } else {
             Add-DistributionGroupMember -Identity $groupDisplayName -Member $upn2 -BypassSecurityGroupManagerCheck
-            Write-Log "Added $upn2 to Mail Enabled Security Group $groupDisplayName" "INFO"
+            Write-Log "Added $upn2 to Mail Enabled Security Group $groupDisplayName" "info"
         }
     }
 
@@ -273,10 +272,10 @@ function Process-M365GroupMembership {
         $isMember = Get-UnifiedGroupLinks -Identity $groupId -LinkType Members | Where-Object { $_.PrimarySmtpAddress -eq $upn2 }
 
         if ($isMember) {
-            Write-Log "User $upn2 is already a member of Microsoft 365 Group $groupDisplayName" "INFO"
+            Write-Log "User $upn2 is already a member of Microsoft 365 Group $groupDisplayName" "info"
         } else {
             Add-UnifiedGroupLinks -Identity $groupId -LinkType Members -Links $upn2 -ErrorAction SilentlyContinue
-            Write-Log "Added $upn2 to Microsoft 365 Group $groupDisplayName" "INFO"
+            Write-Log "Added $upn2 to Microsoft 365 Group $groupDisplayName" "info"
         }
     }
 
@@ -302,9 +301,9 @@ function Main {
     $user2 = Get-AzureADUser -Filter "UserPrincipalName eq '$upn2'"
 
     if ($user1 -eq $null) {
-        Write-Log "User '$upn1' not found." "ERROR"
+        Write-Log "User '$upn1' not found." "error"
     } elseif ($user2 -eq $null) {
-        Write-Log "User '$upn2' not found." "ERROR"
+        Write-Log "User '$upn2' not found." "error"
     } else {
         $user1ObjectId = $user1.ObjectId
         $user2ObjectId = $user2.ObjectId
