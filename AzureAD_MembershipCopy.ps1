@@ -19,11 +19,12 @@
     GitHub Repository: https://github.com/calvin-quint/AzureAD_MembershipCopy
     
 .EMAIL
-    Contact email: github@myqnet.io   
+    Contact email: github@myqnet.io
+    
 #>
 
 
-# Function to check if OneDrive exists
+# Function that checks whether the OneDrive environment variable is set, returning true if it is, indicating the presence of OneDrive on the system, and false if it's not, helping to determine
 function Test-OneDrive {
     if ($env:OneDrive -ne $null -and $env:OneDrive -ne "") {
         return $true
@@ -32,7 +33,9 @@ function Test-OneDrive {
     }
 }
 
-# Function to get the log directory path
+# Function that determines the appropriate directory path for storing log files based on the presence of OneDrive. 
+#It returns the path to the log directory within the user's Documents folder, accounting for OneDrive if it is available, 
+#simplifying log file management in PowerShell scripts.
 function Get-LogDirectory {
     if (Test-OneDrive) {
         return "$env:OneDrive\Documents\Scripts\Powershell\Logs"
@@ -41,6 +44,8 @@ function Get-LogDirectory {
     }
 }
 
+#Function that ensures the existence of a specified directory and log file, creating them if they don't exist. It provides error handling and logging, 
+#making it a valuable utility for maintaining a structured logging environment in PowerShell scripts.
 function Ensure-DirectoryAndLogFile {
     param (
         [string]$directoryPath,
@@ -70,7 +75,8 @@ function Ensure-DirectoryAndLogFile {
     }
 }
 
-
+#Function that records log messages with timestamps and color-coded levels (INFO in Yellow and ERROR in Red), displaying them in the console and appending them to a log file. 
+#It also manages log file size by performing log rotation when it exceeds a defined limit, ensuring effective logging and file management in PowerShell scripts.
 function Write-Log {
     param(
         [string]$message,
@@ -117,7 +123,7 @@ function Write-Log {
 }
 
 
-# Function to validate email address format
+# Function that checks whether a given string matches the common pattern of a valid email address, returning true if it does and false if it doesn't
 function Validate-EmailAddress {
     param(
         [string]$email
@@ -130,7 +136,8 @@ function Validate-EmailAddress {
     }
 }
 
-# Function to get user input for email address
+# Function that  prompts the user for an email address input and ensures its validity by repeatedly requesting input until a valid email address format is provided, 
+#offering a user-friendly way to collect valid email addresses in PowerShell scripts while providing error logging for invalid inputs.
 function Get-ValidEmailInput {
     param(
         [string]$prompt
@@ -146,11 +153,15 @@ function Get-ValidEmailInput {
     return $email
 }
 
+#Function that extracts the domain from an email address and checks if it belongs to a list of allowed domains,
+#returning true if it's valid, making it useful for domain-based validation of email addresses.
 function IsValidDomain($email, $allowedDomains) {
     $domain = $email.Split('@')[1]
     return $domain -in $allowedDomains
 }
 
+#Function thatprompts the user to input an email address while ensuring it is both non-empty and belongs to a list of allowed domains, 
+#providing error messages and retries until a valid email address is provided.
 function Get-ValidEmailInputWithDomainCheck($message, $allowedDomains) {
     $email = $null
 
@@ -170,6 +181,10 @@ function Get-ValidEmailInputWithDomainCheck($message, $allowedDomains) {
     return $email
 }
 
+# This function allows users to input two distinct email addresses (User Principal Names or UPNs) with optional domain validation.
+# It ensures that both UPNs entered are not empty and different from each other, providing error messages and retries if needed.
+# When $validationMethod is set to 1, it enforces input email addresses to belong to allowed domains specified in the $allowedDomains array.
+# If $validationMethod is set to 0, it requires a valid email address format without domain restrictions.
 function Get-UniqueEmailInputs {
     param (
         [int]$validationMethod = 1
@@ -215,7 +230,8 @@ function Get-UniqueEmailInputs {
 
 
 
-# Function to install and import a module
+# Function that checks if a PowerShell module is already installed and installs it if not. 
+#It also imports the module and handles administrator rights, providing a convenient way to ensure the required module is available for use in the script.
 function Install-AndImportModule {
     param(
         [string]$moduleName,
@@ -246,7 +262,8 @@ function Connect-ToExchangeOnline {
     Connect-ExchangeOnline
 }
 
-# Function to add user to group
+# Function that attempts to add a user to an Azure AD group using their object IDs and provides logging for success or failure, 
+#making it a useful utility for managing Azure AD group memberships.
 function Add-UserToGroup {
     param(
         [string]$userObjectId,
@@ -263,7 +280,9 @@ function Add-UserToGroup {
     }
 }
 
-# Function to process group membership
+# Function to process group membership for two users in Azure AD. It iterates through user1's groups, 
+#checks if user2 is already a member of those groups, and adds them if not, providing informative logging along the way.
+# This function simplifies the management of group memberships between users.
 function Process-GroupMembership {
     param(
         [string]$upn1,
@@ -288,7 +307,9 @@ function Process-GroupMembership {
     Write-Log "$upn2 has been added to Azure AD groups that $upn1 is a member of." "INFO"
 }
 
-# Function to process distribution group membership
+# Function to process distribution group membership connects to Exchange Online and manages membership in distribution groups. 
+#It checks if user2 is already a member of distribution groups user1 belongs to and adds them if not, while providing informative 
+#logging throughout the process. This function simplifies the management of distribution group memberships in an Exchange Online environment.
 function Process-DistributionGroupMembership {
     param(
         [string]$upn1,
@@ -314,6 +335,9 @@ function Process-DistributionGroupMembership {
    
 }
 
+#This function manages membership in mail-enabled security groups. It checks if user2 is already a member of mail-enabled security groups 
+#that user1 belongs to and adds them if not, providing informative logging for the process. 
+#This function simplifies the management of mail-enabled security group memberships.
 function Process-MailEnableSecurityGroup {
     param(
         [string]$upn1,
@@ -339,6 +363,8 @@ function Process-MailEnableSecurityGroup {
    
 }
 
+#This function  manages membership in Microsoft 365 (M365) groups. It checks if user2 is already a member of M365 groups that user1 belongs to and adds them if not, 
+#providing informative logging for the process. This function simplifies the management of M365 group memberships in an Exchange Online environment.
 function Process-M365GroupMembership {
     param(
         [string]$upn1,
@@ -365,7 +391,9 @@ function Process-M365GroupMembership {
 
 
 
-# Main script logic
+# This function  function orchestrates the execution of various operations related to user and group memberships, 
+#including module installation, user retrieval, and group membership processing.
+#It logs the progress and completion of the script while ensuring that all necessary modules and user information are handled effectively.
 function Main {
     Write-Log "Starting script execution." "INFO"
 
