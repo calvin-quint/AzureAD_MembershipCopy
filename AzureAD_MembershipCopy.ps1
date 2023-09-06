@@ -18,7 +18,7 @@
 .LINK
     GitHub Repository: https://github.com/calvin-quint/AzureAD_MembershipCopy
     
-.EMAIL
+.CONTACT
     Contact email: github@myqnet.io
     
 #>
