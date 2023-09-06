@@ -100,8 +100,7 @@ function Write-Log {
         Write-Host $logMessage -ForegroundColor $errorColor
     } else {
         Write-Host $logMessage
-        }
-
+    }
 
     # Ensure the log directory and log file exist using the combined function
     Ensure-DirectoryAndLogFile -directoryPath $logDirectory -logFilePath $logFilePath
@@ -188,7 +187,7 @@ function Get-ValidEmailInputWithDomainCheck($message, $allowedDomains) {
 # If $validationMethod is set to 0, it requires a valid email address format without domain restrictions.
 function Get-UniqueEmailInputs {
     param (
-        [int]$validationMethod = 0
+        [int]$validationMethod = 1
     )
 
     if ($validationMethod -eq 0) {
@@ -274,18 +273,13 @@ function Add-UserToGroup {
     )
 
     try {
-        $group = Get-AzureADGroup -ObjectId $groupObjectId
-        if ($group.DirSyncEnabled -eq $false) {
-            Add-AzureADGroupMember -ObjectId $groupObjectId -RefObjectId $userObjectId -ErrorAction Stop
-            Write-Log "Added $userUpn to Azure AD group $groupName" "INFO"
-        }
-        else {
-            Write-Log "Skipping AD Group $groupName because it is synchronized from on-premises" "INFO"
-        }
+        Add-AzureADGroupMember -ObjectId $groupObjectId -RefObjectId $userObjectId -ErrorAction Stop
+        Write-Log "Added $userUpn to Azure AD group $groupName" "INFO"
     } catch {
         Write-Log "Failed to add $userUpn to Azure AD group $groupName" "ERROR"
     }
 }
+
 # Function to process group membership for two users in Azure AD. It iterates through user1's groups, 
 #checks if user2 is already a member of those groups, and adds them if not, providing informative logging along the way.
 # This function simplifies the management of group memberships between users.
@@ -306,11 +300,7 @@ function Process-GroupMembership {
         if ($user2Groups.ObjectId -contains $groupId) {
             Write-Log "$upn2 is already a member of Azure AD group $($group1Details.DisplayName)" "INFO"
         } else {
-            if ($group1Details.DirSyncEnabled -eq $false) {
-                Add-UserToGroup -userObjectId $user2ObjectId -groupObjectId $groupId -userUpn $upn2 -groupName $group1Details.DisplayName
-            } else {
-                Write-Log "Skipping AD Group $($group1Details.DisplayName) because it is synchronized from on-premises" "INFO"
-            }
+            Add-UserToGroup -userObjectId $user2ObjectId -groupObjectId $groupId -userUpn $upn2 -groupName $group1Details.DisplayName
         }
     }
 
