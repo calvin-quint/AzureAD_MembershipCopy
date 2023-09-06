@@ -1,13 +1,26 @@
-<#   
+<#
+.SYNOPSIS
+    This script transfers group memberships from a source user to a destination user.
+    
+.DESCRIPTION
+      This PowerShell script automates the process of copying user group memberships between a source user and destination user in Azure Active Directory (Azure AD) and Exchange Online.
+    It ensures consistent group access for both users.
+    
+.PARAMETER ParameterName
+    Get-UniqueEmailInputs function (validationMethod = 0 or 1, depending on the desired validation method)
+    
 .NOTES
     File Name      : AzureAD_MembershipCopy.ps1
-    Description    : This PowerShell script is designed to automate the copying of user group memberships between two users in Azure Active Directory (Azure AD) and Exchange Online. 
-                     The script transfers group memberships from a source user to a destination user, ensuring consistent group access for both users.
-    Prerequisite   : AzureAD module and Exchange Online Management module
-    Parameters     : Get-UniqueEmailInputs function validationMethod = 0 or 1 depending what validation you want to be used
+    Author         : Calvin Quint
+    Prerequisite   : AzureAD module, Exchange Online Management module
     License        : GNU GPL
-    Github         : https://github.com/calvin-quint/AzureAD_MembershipCopy
-    Email          : github@myqnet.io
+    
+.LINK
+    GitHub Repository: https://github.com/calvin-quint/AzureAD_MembershipCopy
+    
+.EMAIL
+    Contact email: github@myqnet.io
+    
 #>
 
 
