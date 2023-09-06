@@ -1,3 +1,16 @@
+<#   
+.NOTES
+    File Name      : AzureAD_MembershipCopy.ps1
+    Description    : This PowerShell script is designed to automate the copying of user group memberships between two users in Azure Active Directory (Azure AD) and Exchange Online. 
+                     The script transfers group memberships from a source user to a destination user, ensuring consistent group access for both users.
+    Prerequisite   : AzureAD module and Exchange Online Management module
+    Parameters     : Get-UniqueEmailInputs function validationMethod = 0 or 1 depending what validation you want to be used
+    License        : GNU GPL
+    Github         : https://github.com/calvin-quint/AzureAD_MembershipCopy
+    Email          : github@myqnet.io
+#>
+
+
 # Function to check if OneDrive exists
 function Test-OneDrive {
     if ($env:OneDrive -ne $null -and $env:OneDrive -ne "") {
