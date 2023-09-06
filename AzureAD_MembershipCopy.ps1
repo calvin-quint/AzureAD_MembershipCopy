@@ -6,7 +6,7 @@
       This PowerShell script automates the process of copying user group memberships between a source user and destination user in Azure Active Directory (Azure AD) and Exchange Online.
     It ensures consistent group access for both users.
     
-.PARAMETER ParameterName
+.PARAMETER 
     Get-UniqueEmailInputs function (validationMethod = 0 or 1, depending on the desired validation method)
     
 .NOTES
