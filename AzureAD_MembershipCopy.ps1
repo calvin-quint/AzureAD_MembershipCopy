@@ -187,7 +187,7 @@ function Get-ValidEmailInputWithDomainCheck($message, $allowedDomains) {
 # If $validationMethod is set to 0, it requires a valid email address format without domain restrictions.
 function Get-UniqueEmailInputs {
     param (
-        [int]$validationMethod = 1
+        [int]$validationMethod = 0
     )
 
     if ($validationMethod -eq 0) {
@@ -417,8 +417,9 @@ function Main {
         $user1ObjectId = $user1.ObjectId
         $user2ObjectId = $user2.ObjectId
 
-        $user1Groups = Get-AzureADUserMembership -ObjectId $user1ObjectId | Where-Object { $_.ObjectType -eq "Group" -and $_.SecurityEnabled -eq $true -and $_.MailEnabled -ne $true }
-        $user2Groups = Get-AzureADUserMembership -ObjectId $user2ObjectId | Where-Object { $_.ObjectType -eq "Group" -and $_.SecurityEnabled -eq $true -and $_.MailEnabled -ne $true }
+        $user1Groups = Get-AzureADUserMembership -ObjectId $user1ObjectId | Where-Object { $_.ObjectType -eq "Group" -and $_.SecurityEnabled -eq $true -and $_.MailEnabled -ne $true -and $_.DirSyncEnabled -ne $true }
+        $user2Groups = Get-AzureADUserMembership -ObjectId $user2ObjectId | Where-Object { $_.ObjectType -eq "Group" -and $_.SecurityEnabled -eq $true -and $_.MailEnabled -ne $true -and $_.DirSyncEnabled -ne $true }
+
 
         Process-GroupMembership -upn1 $upn1 -upn2 $upn2 -user1ObjectId $user1ObjectId -user2ObjectId $user2ObjectId -user1Groups $user1Groups -user2Groups $user2Groups
         Process-DistributionGroupMembership -upn1 $upn1 -upn2 $upn2
