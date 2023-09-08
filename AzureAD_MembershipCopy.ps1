@@ -14,6 +14,7 @@
     Author         : Calvin Quint
     Prerequisite   : AzureAD module, Exchange Online Management module
     License        : GNU GPL
+    Permission     : You are free to change and re-distribute this script as per the terms of the GPL.
     
 .LINK
     GitHub Repository: https://github.com/calvin-quint/AzureAD_MembershipCopy
