@@ -34,7 +34,7 @@ Before using the script, ensure you have the following:
 
 ## Logging
 
-The script logs its activities to a log file located at `C:\Scripts\Powershell\Logs\AzureAD_MembershipCopy_Log.txt`.
+The script logs its activities to a log file located at `$env:OneDrive\Documents\Scripts\Powershell\Logs\AzureAD_MembershipCopy_Log.txt`, or `$env:USERPROFILE\Documents\Scripts\Powershell\Logs\AzureAD_MembershipCopy_Log.txt`
 
 ## Important Notes
 
