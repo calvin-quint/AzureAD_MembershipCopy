@@ -20,7 +20,7 @@ Before using the script, ensure you have the following:
 
 ## How to Use
 
-1. Run PowerShell as an administrator.
+1. Run PowerShell as an administrator, if the required modules are not installed.
 2. Navigate to the directory where the script is located.
 3. Run the script using the command: `.\AzureAD_MembershipCopy.ps1`
 
