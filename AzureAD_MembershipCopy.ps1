@@ -281,6 +281,41 @@ function Add-UserToGroup {
     }
 }
 
+function Process-AD {
+    param (
+        [string]$upn1,
+        [string]$upn2,
+        [int]$validatelocalad = 0
+    )
+
+    if ($validatelocalad -eq 1) {
+        # Extract the usernames without domain from UPN
+        $username1 = $upn1.Split('@')[0]
+        $username2 = $upn2.Split('@')[0]
+
+        # Get the source user's groups
+        $sourceUserGroups = Get-ADPrincipalGroupMembership -Identity $username1
+
+        foreach ($group in $sourceUserGroups) {
+            $groupDetails = Get-ADGroup -Identity $group
+            $groupId = $groupDetails.ObjectGuid
+
+            # Check if the destination user is already a member of the group
+            $isMember = Get-ADGroupMember -Identity $group | Where-Object { $_.UserPrincipalName -eq $upn2 }
+
+            if ($isMember -eq $null) {
+                # Add the destination user to the group
+                Add-ADGroupMember -Identity $group -Members $username2
+                Write-Log "Added $username2 to local AD group $($groupDetails.Name)" "INFO"
+            } else {
+                Write-Log "$username2 is already a member of local AD group $($groupDetails.Name)" "INFO"
+            }
+        }
+
+        Write-Log "Completed adding $username2 to groups of $upn1" "INFO"
+    }
+}
+
 # Function to process group membership for two users in Azure AD. It iterates through user1's groups, 
 #checks if user2 is already a member of those groups, and adds them if not, providing informative logging along the way.
 # This function simplifies the management of group memberships between users.
@@ -422,6 +457,7 @@ function Main {
         $user2Groups = Get-AzureADUserMembership -ObjectId $user2ObjectId | Where-Object { $_.ObjectType -eq "Group" -and $_.SecurityEnabled -eq $true -and $_.MailEnabled -ne $true -and $_.DirSyncEnabled -ne $true }
 
 
+        Process-AD -upn1 $upn1 -upn2 $upn2 -validatelocalad 1
         Process-GroupMembership -upn1 $upn1 -upn2 $upn2 -user1ObjectId $user1ObjectId -user2ObjectId $user2ObjectId -user1Groups $user1Groups -user2Groups $user2Groups
         Process-DistributionGroupMembership -upn1 $upn1 -upn2 $upn2
         Process-MailEnableSecurityGroup -upn1 $upn1 -upn2 $upn2 
