@@ -301,7 +301,8 @@ function Process-AD {
             $groupId = $groupDetails.ObjectGuid
 
             # Check if the destination user is already a member of the group
-            $isMember = Get-ADGroupMember -Identity $group | Where-Object { $_.UserPrincipalName -eq $upn2 }
+            $groupMembers = Get-ADGroupMember -Identity $group
+            $isMember = $groupMembers | Where-Object { $_.SamAccountName -eq $username2 }
 
             if ($isMember -eq $null) {
                 # Add the destination user to the group
@@ -315,6 +316,7 @@ function Process-AD {
         Write-Log "Completed adding $username2 to groups of $upn1" "INFO"
     }
 }
+
 
 # Function to process group membership for two users in Azure AD. It iterates through user1's groups, 
 #checks if user2 is already a member of those groups, and adds them if not, providing informative logging along the way.
