@@ -307,9 +307,9 @@ function Process-AD {
             if ($isMember -eq $null) {
                 # Add the destination user to the group
                 Add-ADGroupMember -Identity $group -Members $username2
-                Write-Log "Added $username2 to local AD group $($groupDetails.Name)" "INFO"
+                Write-Log "Added $upn2 to local AD group $($groupDetails.Name)" "INFO"
             } else {
-                Write-Log "$username2 is already a member of local AD group $($groupDetails.Name)" "INFO"
+                Write-Log "$upn2 is already a member of local AD group $($groupDetails.Name)" "INFO"
             }
         }
 
