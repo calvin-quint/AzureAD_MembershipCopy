@@ -460,9 +460,14 @@ function Main {
 
 
         Process-AD -upn1 $upn1 -upn2 $upn2 -validatelocalad 1
+        Write-Log ""
         Process-GroupMembership -upn1 $upn1 -upn2 $upn2 -user1ObjectId $user1ObjectId -user2ObjectId $user2ObjectId -user1Groups $user1Groups -user2Groups $user2Groups
+        Write-Log ""
+        Write-Log ""
         Process-DistributionGroupMembership -upn1 $upn1 -upn2 $upn2
+        Write-Log ""
         Process-MailEnableSecurityGroup -upn1 $upn1 -upn2 $upn2 
+        Write-Log ""
         Process-M365GroupMembership -upn1 $upn1 -upn2 $upn2 
     }
 
