@@ -12,7 +12,7 @@
 .NOTES
     File Name      : AzureAD_MembershipCopy.ps1
     Author         : Calvin Quint
-    Prerequisite   : AzureAD module, Exchange Online Management module
+    Prerequisite   : Active Directory module, AzureAD module, Exchange Online Management module
     License        : GNU GPL
     Permission     : You are free to change and re-distribute this script as per the terms of the GPL.
     
@@ -281,6 +281,11 @@ function Add-UserToGroup {
     }
 }
 
+
+#This PowerShell function, named Process-AD, is designed to facilitate the management of Active Directory (AD) group memberships. 
+#It takes two user principal names (UPNs) as input and an optional validation flag. When the validation flag is set to 1,
+#it extracts the usernames from the UPNs, retrieves the source user's AD groups, and checks if the destination user is already a member of those groups.
+#If not, it adds the destination user to the specified AD groups and logs the actions taken.
 function Process-AD {
     param (
         [string]$upn1,
