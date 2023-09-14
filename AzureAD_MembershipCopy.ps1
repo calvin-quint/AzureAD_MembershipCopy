@@ -215,7 +215,7 @@ function Get-UniqueEmailInputs {
         }
     }
     else {
-        $allowedDomains = @("op.test.com", "test.com")
+        $allowedDomains = @("admin.test.com", "test.com")
 
         $upn1 = Get-ValidEmailInputWithDomainCheck "Enter the source username (e.g., user@$($allowedDomains[0]) or user@$($allowedDomains[1]))" $allowedDomains
         $upn2 = Get-ValidEmailInputWithDomainCheck "Enter the destination username (e.g., user@$($allowedDomains[0]) or user@$($allowedDomains[1]))" $allowedDomains
