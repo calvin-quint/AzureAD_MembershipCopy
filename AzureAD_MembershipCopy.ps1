@@ -290,11 +290,8 @@ function Process-AD {
     param (
         [string]$upn1,
         [string]$upn2,
-        [int]$validatelocalad = 0,
-        [int]$bypassdns = 1
-
+        [int]$validatelocalad = 0
     )
-
 
     if ($validatelocalad -eq 1) {
         # Extract the usernames without domain from UPN
@@ -304,32 +301,28 @@ function Process-AD {
         # Get the source user's groups
         $sourceUserGroups = Get-ADPrincipalGroupMembership -Identity $username1
 
-      foreach ($group in $sourceUserGroups) {
-    $groupDetails = Get-ADGroup -Identity $group
-    $groupId = $groupDetails.ObjectGuid
+        foreach ($group in $sourceUserGroups) {
+            $groupDetails = Get-ADGroup -Identity $group
+            $groupId = $groupDetails.ObjectGuid
 
-   #Checks for group dnaFusion." If the condition is met, the script logs a message indicating that the user 
-   #specified by $upn2 is being skipped for membership in that particular group due to the presence of 'dnaFusion'
-   # in the group name. The continue statement ensures that the script proceeds to the next iteration of the loop
-   # without executing the subsequent code for this specific group.
-   # having $bypassdns -eq 1 will run but 0 will not run this part
-    if ($bypassdna -eq 1 -and $groupDetails.Name -like "*dnaFusion*") {
-        Write-Log "Skipping $upn2 for group $($groupDetails.Name) as it contains 'dnaFusion'" "INFO"
-        continue
-    }
+            # Check if the group name contains "dnaFusion"
+            if ($groupDetails.Name -like "*dnaFusion*") {
+                 Write-Log "Skipping $upn2 for group $($groupDetails.Name) as it contains 'dnaFusion'" "INFO"
+                 continue
+     }
 
-    # Check if the destination user is already a member of the group
-    $groupMembers = Get-ADGroupMember -Identity $group
-    $isMember = $groupMembers | Where-Object { $_.SamAccountName -eq $username2 }
+            # Check if the destination user is already a member of the group
+            $groupMembers = Get-ADGroupMember -Identity $group
+            $isMember = $groupMembers | Where-Object { $_.SamAccountName -eq $username2 }
 
-    if ($isMember -eq $null) {
-        # Add the destination user to the group
-        Add-ADGroupMember -Identity $group -Members $username2
-        Write-Log "Added $upn2 to local AD group $($groupDetails.Name)" "INFO"
-    } else {
-        Write-Log "$upn2 is already a member of local AD group $($groupDetails.Name)" "INFO"
-    }
-}
+            if ($isMember -eq $null) {
+                # Add the destination user to the group
+                Add-ADGroupMember -Identity $group -Members $username2
+                Write-Log "Added $upn2 to local AD group $($groupDetails.Name)" "INFO"
+            } else {
+                Write-Log "$upn2 is already a member of local AD group $($groupDetails.Name)" "INFO"
+            }
+        }
 
         Write-Log "Completed adding $username2 to groups of $upn1" "INFO"
     }
